@@ -33,10 +33,15 @@ public class VMtranslator {
             try(PrintStream outStream = new PrintStream(outputFileName)) {
                 CodeWriter writer = new CodeWriter(outStream);
 
-                for(String targetFileName : targets) {
-                    writer.setFileName(targetFileName);
+                for(String fullFilePath : targets) {
+                    String strippedFileName = fullFilePath
+                            .replaceAll("^.*/", "")
+                            .replaceFirst("\\.vm$", "");
+                    System.out.println();
 
-                    try(BufferedReader reader = new BufferedReader(new FileReader(targetFileName))) {
+                    writer.setFileName(strippedFileName);
+
+                    try(BufferedReader reader = new BufferedReader(new FileReader(fullFilePath))) {
                         Parser p = new Parser(reader);
 
                         while(p.hasMoreCommands()) {
@@ -44,7 +49,7 @@ public class VMtranslator {
                         }
                     }
                     catch (IOException e) {
-                        System.out.println("Failed to read " + targetFileName);
+                        System.out.println("Failed to read file: " + fullFilePath);
                         throw e;
                     }
                 }

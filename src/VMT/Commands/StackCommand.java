@@ -5,6 +5,8 @@
 
 package VMT.Commands;
 
+import VMT.LabelProvider;
+
 import java.io.PrintStream;
 
 /**
@@ -36,7 +38,7 @@ public class StackCommand implements Command {
     }
 
     @Override
-    public void write(PrintStream outStream, String sourceFileName) {
+    public void write(PrintStream outStream, LabelProvider lp) {
         if(segment == SegmentType.CONSTANT) {
             // We'll handle constant pushes differently,
             // as we can make some sneaky assumptions thanks to

@@ -20,6 +20,7 @@ public class CodeWriter {
 
     private PrintStream writer;
     private String fileName = "";
+    private LabelProvider lp = null;
 
     public CodeWriter(PrintStream writer) {
         this.writer = writer;
@@ -42,17 +43,16 @@ public class CodeWriter {
      * @param newFileName
      */
     public void setFileName(String newFileName) {
-        // So this is used in order to make sure that all labels
-        // are unique to the file we're reading from and
-        // we don't accidentally generate a duplicate label.
         fileName = newFileName;
+        lp = new LabelProvider(newFileName);
 
-        // However, just to make debugging this stuff easier,
+        // Just to make debugging this stuff easier,
         // let's also log where the new file begins.
         writer.println("// " + newFileName);
+
     }
 
     public void write(Command cmd) {
-        cmd.write(writer, fileName);
+        cmd.write(writer, lp);
     }
 }

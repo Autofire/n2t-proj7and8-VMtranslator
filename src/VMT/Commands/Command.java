@@ -5,6 +5,8 @@
 
 package VMT.Commands;
 
+import VMT.LabelProvider;
+
 import java.io.PrintStream;
 
 /**
@@ -15,7 +17,8 @@ public interface Command {
     /**
      * Write this command onto the output stream as assembly. Note
      * that this will almost certainly output multiple lines.
-     * @param outStream Stream which to write onto.
+     * @param out Stream which to write onto.
+     * @param lp Used when creating labels in asm code.
      */
-    public void write(PrintStream outStream, String sourceFileName);
+    public void write(PrintStream out, LabelProvider lp);
 }

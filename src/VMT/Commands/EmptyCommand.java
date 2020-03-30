@@ -5,6 +5,8 @@
 
 package VMT.Commands;
 
+import VMT.LabelProvider;
+
 import java.io.PrintStream;
 
 /**
@@ -12,7 +14,7 @@ import java.io.PrintStream;
  */
 public class EmptyCommand implements Command {
     @Override
-    public void write(PrintStream outStream, String currentFileName) {
+    public void write(PrintStream outStream, LabelProvider lp) {
         // We do nothing.
     }
 }

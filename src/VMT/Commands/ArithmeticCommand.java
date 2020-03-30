@@ -5,6 +5,8 @@
 
 package VMT.Commands;
 
+import VMT.LabelProvider;
+
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +40,7 @@ public class ArithmeticCommand implements Command {
     }
 
     @Override
-    public void write(PrintStream out, String currentFileName) {
+    public void write(PrintStream out, LabelProvider lp) {
         // SP points to the stack pointer
         // R13-R15 can be used as scratch space
 
@@ -49,7 +51,7 @@ public class ArithmeticCommand implements Command {
             // TODO write this
         }
         else {
-            // So it wasn't a unary operation, so it must be binary.
+            // It wasn't a unary operation, so it must be binary.
             // We'll have to modify SP, since the stack will lose a
             // value.
 
@@ -64,6 +66,8 @@ public class ArithmeticCommand implements Command {
             // A -> X operand, result
             // D == Y operand
             switch(operation) {
+                // Each of these just drop the result directly into
+                // the X position.
                 case ADD:
                     out.println("M=D+M");   // Store Y plus X
                     break;
@@ -76,8 +80,44 @@ public class ArithmeticCommand implements Command {
                 case OR:
                     out.println("M=D|M");   // Store Y or X
                     break;
+
+                // These aren't as straightforward; they drop their
+                // results into the X position, but that result
+                // is either a one or a zero.
                 case EQ:
-                    //break;
+                    String baseLabel = lp.nextLabel();
+                    String trueLabel = baseLabel + ".true";
+                    String endLabel  = baseLabel + ".end";
+
+                    // X = Y -> X - Y = 0
+                    // X > Y -> X - Y > 0
+                    // X < Y -> X - Y < 0
+                    out.println("D=M-D");           // Store X minus Y
+                    out.println("@"+trueLabel);     // If X-Y = 0...
+                    out.println("D;JEQ");           // ...jump to true branch
+
+                    // FALSE BRANCH
+                    out.println("@0");              // Prep false
+                    out.println("D=A");             // Save false for later
+                    out.println("@"+endLabel);      // Prep to skip true branch
+                    out.println("0;JMP");           // Skip true branch
+
+                    // TRUE BRANCH
+                    out.println("("+trueLabel+")");
+                    out.println("@1");              // Prep true
+                    out.println("D=A");             // Save true for later
+
+                    // BRANCHES CONVERGE
+                    out.println("("+endLabel+")");
+
+                    // Now we must store the result of the condition
+                    // (held in D) on top of the stack.
+                    out.println("@SP");     // Prepare to access the stack
+                    out.println("A=M-1");   // Load the address of top value on stack
+                    out.println("M=D");     // Store result
+
+                    break;
+
                 case GT:
                     //break;
                 case LT:
