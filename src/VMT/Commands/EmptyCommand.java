@@ -12,7 +12,7 @@ import java.io.PrintStream;
  */
 public class EmptyCommand implements Command {
     @Override
-    public void write(PrintStream outStream) {
+    public void write(PrintStream outStream, String currentFileName) {
         // We do nothing.
     }
 }

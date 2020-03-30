@@ -10,6 +10,7 @@ import VMT.Commands.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Stack;
 
 /**
  * Serves as a wrapper for a vm file. This will run through,
@@ -44,10 +45,27 @@ public class Parser {
             throw new IllegalStateException("Can't fetch a command when there are none left!");
         }
 
-        String line = reader.readLine();
-        Command result = new EmptyCommand();
+        Command result;
+        String line = reader.readLine().split("//")[0].strip();
 
+        if(line.isBlank()) {
+            result = new EmptyCommand();
+        }
+        else {
+            String[] words = line.split("\\s+");
 
+            if(words[0].matches(ArithmeticCommand.KEYWORDS)) {
+                result = new ArithmeticCommand(words);
+            }
+            else if(words[0].matches(StackCommand.KEYWORDS)) {
+                result = new StackCommand(words);
+            }
+            else {
+                throw new IllegalArgumentException(
+                        "Unrecognized statement: " + line
+                );
+            }
+        }
 
         return result;
     }

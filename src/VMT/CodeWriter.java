@@ -16,10 +16,24 @@ import java.io.PrintStream;
  */
 public class CodeWriter {
 
+    private static final int STACK_START = 256;
+
     private PrintStream writer;
+    private String fileName = "";
 
     public CodeWriter(PrintStream writer) {
         this.writer = writer;
+        WriteSetupCode();
+    }
+
+    private void WriteSetupCode() {
+        // We gotta make sure SP contains the
+        // beginning of the stack.
+        writer.println("@" + STACK_START);
+        writer.println("D=A");
+
+        writer.println("@SP");
+        writer.println("M=D");
     }
 
     /**
@@ -28,12 +42,17 @@ public class CodeWriter {
      * @param newFileName
      */
     public void setFileName(String newFileName) {
-        // I honestly have no clue what the heck this is supposed
-        // to do, so I'll just spit out a random comment.
+        // So this is used in order to make sure that all labels
+        // are unique to the file we're reading from and
+        // we don't accidentally generate a duplicate label.
+        fileName = newFileName;
+
+        // However, just to make debugging this stuff easier,
+        // let's also log where the new file begins.
         writer.println("// " + newFileName);
     }
 
     public void write(Command cmd) {
-        cmd.write(writer);
+        cmd.write(writer, fileName);
     }
 }

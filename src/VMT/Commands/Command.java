@@ -17,5 +17,5 @@ public interface Command {
      * that this will almost certainly output multiple lines.
      * @param outStream Stream which to write onto.
      */
-    public void write(PrintStream outStream);
+    public void write(PrintStream outStream, String sourceFileName);
 }
