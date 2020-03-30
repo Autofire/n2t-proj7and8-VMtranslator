@@ -48,7 +48,18 @@ public class ArithmeticCommand implements Command {
             // We can just yoink the value off the top of the
             // stack, modify it, and then return it to the
             // top of the stack.
-            // TODO write this
+            out.println("@SP");     // Prepare to access the stack
+            out.println("A=M-1");   // Load the address of top of value on stack
+
+            switch(operation) {
+                case NEG:
+                    out.println("M=-M");
+                    break;
+
+                case NOT:
+                    out.println("M=!M");
+                    break;
+            }
         }
         else {
             // It wasn't a unary operation, so it must be binary.
@@ -56,7 +67,7 @@ public class ArithmeticCommand implements Command {
             // value.
 
             out.println("@SP");   // Prepare to access the stack
-            out.println("M=M-1"); // "Remove" top of stack
+            out.println("M=M-1"); // While we're here, "remove" top of stack
             out.println("A=M");   // Load stack pointer itself
 
             // A -> Old top value of stack
@@ -84,28 +95,48 @@ public class ArithmeticCommand implements Command {
                 // These aren't as straightforward; they drop their
                 // results into the X position, but that result
                 // is either a one or a zero.
+                //
+                // Note that our solution to each of these are nearly
+                // identical, so we'll lump them together. Of course,
+                // we'll have to check for it AGAIN, but it's worth it.
                 case EQ:
+                case GT:
+                case LT:
                     String baseLabel = lp.nextLabel();
                     String trueLabel = baseLabel + ".true";
                     String endLabel  = baseLabel + ".end";
 
-                    // X = Y -> X - Y = 0
-                    // X > Y -> X - Y > 0
-                    // X < Y -> X - Y < 0
+                    // Note that each condition is this:
+                    //   X = Y -> X - Y = 0
+                    //   X > Y -> X - Y > 0
+                    //   X < Y -> X - Y < 0
+                    //
+                    // Thus we need to only perform X - Y and then
+                    // compare against 0. Our ASM language can do this
+                    // easily.
                     out.println("D=M-D");           // Store X minus Y
                     out.println("@"+trueLabel);     // If X-Y = 0...
-                    out.println("D;JEQ");           // ...jump to true branch
+
+                    switch(operation) {
+                        case EQ:
+                            out.println("D;JEQ");   // ...jump to true branch
+                            break;
+                        case GT:
+                            out.println("D;JGT");   // ...jump to true branch
+                            break;
+                        case LT:
+                            out.println("D;JLT");   // ...jump to true branch
+                            break;
+                    }
 
                     // FALSE BRANCH
-                    out.println("@0");              // Prep false
-                    out.println("D=A");             // Save false for later
+                    out.println("D=0");             // Save false for later
                     out.println("@"+endLabel);      // Prep to skip true branch
                     out.println("0;JMP");           // Skip true branch
 
                     // TRUE BRANCH
                     out.println("("+trueLabel+")");
-                    out.println("@1");              // Prep true
-                    out.println("D=A");             // Save true for later
+                    out.println("D=-1");            // Save true for later
 
                     // BRANCHES CONVERGE
                     out.println("("+endLabel+")");
@@ -118,11 +149,6 @@ public class ArithmeticCommand implements Command {
 
                     break;
 
-                case GT:
-                    //break;
-                case LT:
-                    throw new UnsupportedOperationException("WIP");
-                    //break;
 
                 default: // If we somehow get here with an unary operation
                     throw new UnsupportedOperationException("Illegal state");
