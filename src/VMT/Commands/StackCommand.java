@@ -70,7 +70,7 @@ public class StackCommand implements Command {
         //
         // For pops (i.e. WRITE to a segment), our procedure is thus:
         //  1. Determine where we shall write; put that into A.
-        //  2. Save A into R13.
+        //  2. Save that address into R13.
         //  3. Yank the old top value of the stack.
         //  4. Store the value into the address determined at 1.
         //  5. Decrement the stack pointer.
@@ -137,7 +137,31 @@ public class StackCommand implements Command {
                 break;
 
             case POP:
+                if(segment == SegmentType.CONSTANT) {
+                    throw new UnsupportedOperationException("W-wait, popping into constant space? THAT'S ILLEGAL!");
+                }
+
+                // Step 2: Saving the address into R13
+                out.println("D=A");     // Address is currently in A, we'd lose it if we loaded R13's address
+                out.println("@R13");    // Prep to write into R13
+                out.println("M=D");     // Save the destination address into R13
+
+                // Step 3: Load the current top value from the stack
+                out.println("@SP");     // Load the address of stack + 1
+                out.println("A=M-1");   // Get the address of the top value on the stack
+                out.println("D=M");     // Get the top value on the stack
+
+                // Step 4: Store the value into the address determined at 1
+                //  (Note that the value we want to store is safe in D... just can't use that)
+                out.println("@R13");    // We stored the address here, remember?
+                out.println("A=M");     // Recall the address to store the data in
+                out.println("M=D");     // Finally, store the value from the stack in memory
+
+                // Step 5: Decrement the stack pointer.
+                out.println("@SP");     // Load the pointer to the pointer of the stack
+                out.println("M=M-1");   // No longer include the old top of the stack
                 break;
+
             default:
                 throw new UnsupportedOperationException("Unhandled mode");
         }
