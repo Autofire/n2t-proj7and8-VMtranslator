@@ -86,31 +86,65 @@ public class StackCommand implements Command {
             case CONSTANT:
                 out.println("@" + index);
                 break;
-            case LOCAL:
-                out.println("@LCL");
-                break;
-            case ARGUMENT:
-                out.println("@ARG");
-                break;
-            case THIS:
-                out.println("@THIS");
-                break;
-            case THAT:
-                out.println("@THAT");
-                break;
-            case STATIC:
-            case POINTER:
-            case TEMP:
-            default: // and CONSTANT
-                System.out.println("Not handled yet");
-                break;
-        }
 
-        if(segment != SegmentType.CONSTANT) {
-            out.println("A=M");         // Follow the address loaded in step 1
-            out.println("D=A");         // Store that address temporarily; we need to add in the offset
-            out.println("@" + index);   // Load up the offset
-            out.println("A=D+A");       // Now we got the true location of the data
+            case LOCAL:
+            case ARGUMENT:
+            case THIS:
+            case THAT:
+                out.println("@" + index);   // Load up the offset
+                out.println("D=A");         // Store the offset for later use
+
+                // Load the pointer to where the segment begins
+                switch(segment) {
+                    case ARGUMENT:
+                        out.println("@ARG");
+                        break;
+                    case LOCAL:
+                        out.println("@LCL");
+                        break;
+                    case THIS:
+                        out.println("@THIS");
+                        break;
+                    case THAT:
+                        out.println("@THAT");
+                        break;
+                }
+
+                out.println("A=M");         // Follow the loaded pointer
+                out.println("A=D+A");       // Compute the data's true location
+
+                break;
+
+            case TEMP:
+            case POINTER:
+                out.println("@" + index);   // Load up the offset
+                out.println("D=A");         // Save the offset for later use
+
+                // Load the beginning of the desired registers
+                switch (segment) {
+                    case TEMP:
+                        out.println("@R5");
+                        break;
+                    case POINTER:
+                        out.println("@THIS");
+                        break;
+                }
+
+                out.println("A=D+A");       // Compute the data's true location
+                break;
+
+            case STATIC:
+            default:
+                System.out.println(
+                        "Not handled yet: "
+                        + String.join(
+                                " ",
+                                mode.toString(),
+                                segment.toString(),
+                                Integer.toString(index)
+                        )
+                );
+                break;
         }
 
         switch(mode) {
