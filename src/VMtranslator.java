@@ -8,6 +8,8 @@ import VMT.Commands.StackCommand;
 import VMT.Parser;
 
 import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class VMtranslator {
 
@@ -17,23 +19,54 @@ public class VMtranslator {
             System.out.println("   or: VMtranslator sourceDirectory");
         }
         else {
-            String[] targets;
+            String[] targetFileNames;
             String outputFileName;
 
             if(args[0].endsWith(".vm")) {
-                targets = new String[]{args[0]};
+                targetFileNames = new String[]{args[0]};
                 outputFileName = args[0].replace(".vm", ".asm");
             }
             else {
-                // We must have gotten a directory
-                // TODO make this dig through a directory
-                throw new UnsupportedOperationException("TODO");
+                File targetDir = new File(args[0]);
+
+                if(targetDir.isDirectory()) {
+                    // We must have gotten a directory
+                    FilenameFilter vmFilter = new FilenameFilter() {
+                        public boolean accept(File dir, String name) {
+                            return name.toLowerCase().endsWith(".vm");
+                        }
+                    };
+
+                    List<String> targetFiles = new LinkedList<String>();
+
+                    for (File subFile : targetDir.listFiles(vmFilter)) {
+                        if (subFile.isFile()) {
+                            String filePath = subFile.getPath();
+                            System.out.println("Adding " + filePath);
+                            targetFiles.add(filePath);
+                        }
+                    }
+
+                    if(targetFiles.size() > 0) {
+                        targetFileNames = targetFiles.toArray(new String[targetFiles.size()]);
+                        outputFileName = targetDir.getPath() + ".asm";
+                    }
+                    else {
+                        throw new IllegalArgumentException("Directory must contain at least one .vm file.");
+                    }
+                }
+                else {
+                    throw new IllegalArgumentException("Must receive either a .vm file or a directory.");
+                }
+
             }
+
+            System.out.println("Writing to " + outputFileName);
 
             try(PrintStream outStream = new PrintStream(outputFileName)) {
                 CodeWriter writer = new CodeWriter(outStream);
 
-                for(String fullFilePath : targets) {
+                for(String fullFilePath : targetFileNames) {
                     String strippedFileName = fullFilePath
                             .replaceAll("^.*/", "")
                             .replaceFirst("\\.vm$", "");
