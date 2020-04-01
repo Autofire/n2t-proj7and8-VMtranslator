@@ -38,48 +38,108 @@ public class StackCommand implements Command {
     }
 
     @Override
-    public void write(PrintStream outStream, LabelProvider lp) {
-        if(segment == SegmentType.CONSTANT) {
-            // We'll handle constant pushes differently,
-            // as we can make some sneaky assumptions thanks to
-            // it.
-            //
-            // Note that a constant pop isn't possible. That
-            // makes no sense.
-            switch(mode) {
-                case PUSH:
-                    // Store the constant into D
-                    outStream.println("@" + index);   // Load up our value
-                    outStream.println("D=A");            // Put it in storage
-
-                    // Store the address of the stack into A
-                    outStream.println("@SP");   // Pointer to a pointer atm
-                    outStream.println("A=M");   // Delve one layer in
-
-                    // D == const
-                    // A -> stack top
-                    outStream.println("M=D");   // Update top of stack
-
-                    // Now to do SP=SP+1
-                    outStream.println("D=A+1"); // Save the current stack top address, but offset
-                    outStream.println("@SP");   // Get ready to update SP
-                    outStream.println("M=D");   // SP = SP + 1
-                    break;
-                case POP:
-                    throw new UnsupportedOperationException("Popping into constant memory is impossible!");
-            }
+    public void write(PrintStream out, LabelProvider lp) {
+        if(index < 0) {
+            throw new UnsupportedOperationException("Cannot have a negative value when pushing/popping.");
         }
-        else {
-            // Other than the constant pushes (which have already been handled),
-            // all of these pushes/pops behave similarly. Thus, the plan is
-            // to initially select locations from which we'll push/pop,
-            // and then drop those into a standard template for pushing
-            // and popping.
-            switch (segment) {
-                default:
-                    System.out.println("Not handled yet");
-                    break;
-            }
+
+        // According to the book, memory is divided up this way:
+        //
+        // Registers        0 -    15
+        //   SP             0
+        //   LCL            1
+        //   ARG            2
+        //   THIS           3
+        //   THAT           4
+        //   [temp seg]     5 -    12
+        //   [general]     13 -    15
+        // Static Vars     16 -   255
+        // Stack          256 -  2047
+        // Heap          2048 - 16483
+        // I/O          16384 - 24575
+
+        // For pushes (i.e. READ from a segment), our procedure is thus:
+        //  1. Figure out address of data, and put it into A.
+        //  2. Read that data into the D register
+        //  3. Store value at new top of stack.
+        //  4. Increment the stack pointer.
+        //
+        // Step 1 is different depending on our instruction.
+        // However, the rest are always the same!
+        //
+        //
+        // For pops (i.e. WRITE to a segment), our procedure is thus:
+        //  1. Determine where we shall write; put that into A.
+        //  2. Save A into R13.
+        //  3. Yank the old top value of the stack.
+        //  4. Store the value into the address determined at 1.
+        //  5. Decrement the stack pointer.
+        //
+        // Again, only the first step is unique.
+        // We may use the same code to handle the remaining steps.
+        //
+        // Also, steps 1 of both pushes and pops are can be handled
+        // the same way. Thus, we should get away with minimal duplication.
+
+        // Step 1: Finding the source/destination
+        switch (segment) {
+            case CONSTANT:
+                out.println("@" + index);
+                break;
+            case LOCAL:
+                out.println("@LCL");
+                break;
+            case ARGUMENT:
+                out.println("@ARG");
+                break;
+            case THIS:
+                out.println("@THIS");
+                break;
+            case THAT:
+                out.println("@THAT");
+                break;
+            case STATIC:
+            case POINTER:
+            case TEMP:
+            default: // and CONSTANT
+                System.out.println("Not handled yet");
+                break;
+        }
+
+        if(segment != SegmentType.CONSTANT) {
+            out.println("A=M");         // Follow the address loaded in step 1
+            out.println("D=A");         // Store that address temporarily; we need to add in the offset
+            out.println("@" + index);   // Load up the offset
+            out.println("A=D+A");       // Now we got the true location of the data
+        }
+
+        switch(mode) {
+            case PUSH:
+                // Step 2: Reading the data into D
+                if(segment == SegmentType.CONSTANT) {
+                    out.println("D=A");     // make sure the value doesn't get lost
+                }
+                else {
+                    out.println("D=M");     // Read the data out of memory
+                }
+
+                // Step 3: Store the data on the top of the stack
+                out.println("@SP");   // Pointer to a pointer atm
+                out.println("A=M");   // Delve one layer in
+
+                // D == data
+                // A -> stack top (i.e. one past old stack top)
+                out.println("M=D");   // Update new top of stack
+
+                // Step 4: Increment stack pointer
+                out.println("@SP");   // Get ready to update SP
+                out.println("M=M+1"); // SP = SP + 1
+                break;
+
+            case POP:
+                break;
+            default:
+                throw new UnsupportedOperationException("Unhandled mode");
         }
     }
 }
