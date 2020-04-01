@@ -37,7 +37,7 @@ public class VMtranslator {
                     String strippedFileName = fullFilePath
                             .replaceAll("^.*/", "")
                             .replaceFirst("\\.vm$", "");
-                    System.out.println();
+                    //System.out.println();
 
                     writer.setFileName(strippedFileName);
 

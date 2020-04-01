@@ -43,12 +43,13 @@ public class CodeWriter {
      * @param newFileName
      */
     public void setFileName(String newFileName) {
+
         fileName = newFileName;
         lp = new LabelProvider(newFileName);
 
         // Just to make debugging this stuff easier,
         // let's also log where the new file begins.
-        writer.println("// " + newFileName);
+        writer.println("// BEGIN " + newFileName + ".vm //");
 
     }
 

@@ -134,6 +134,13 @@ public class StackCommand implements Command {
                 break;
 
             case STATIC:
+                out.println(String.join(
+                        "",
+                        "@", lp.labelPrefix(), ".", Integer.toString(index)
+                ));
+                break;
+
+
             default:
                 System.out.println(
                         "Not handled yet: "

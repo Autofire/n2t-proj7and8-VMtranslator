@@ -24,5 +24,8 @@ public class LabelProvider {
         return String.join(".", file, String.valueOf(nextJumpUUID));
     }
 
+    public String labelPrefix() {
+        return file;
+    }
 
 }
