@@ -134,10 +134,7 @@ public class StackCommand implements Command {
                 break;
 
             case STATIC:
-                out.println(String.join(
-                        "",
-                        "@", lp.labelPrefix(), ".", Integer.toString(index)
-                ));
+                out.println("@" + lp.staticLabel(Integer.toString(index)));
                 break;
 
 

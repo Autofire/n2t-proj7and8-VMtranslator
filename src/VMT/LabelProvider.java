@@ -12,20 +12,27 @@ package VMT;
  */
 public class LabelProvider {
     private String file;
+    private String function = "NO_FUNC";
     private int nextJumpUUID = 0;
 
     public LabelProvider(String file) {
         this.file = file;
     }
 
-    public String nextLabel() {
+    public String generatedLabel() {
         nextJumpUUID++;
 
         return String.join(".", file, String.valueOf(nextJumpUUID));
     }
 
-    public String labelPrefix() {
-        return file;
+    public String staticLabel(String name) {
+        return String.join(".", file, name);
+    }
+
+    public String jumpLabel(String name) {
+
+        // TODO This should only allow certain kinds of labels
+        return String.join(".", file, function, name);
     }
 
 }

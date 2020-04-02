@@ -102,7 +102,7 @@ public class ArithmeticCommand implements Command {
                 case EQ:
                 case GT:
                 case LT:
-                    String baseLabel = lp.nextLabel();
+                    String baseLabel = lp.generatedLabel();
                     String trueLabel = baseLabel + ".true";
                     String endLabel  = baseLabel + ".end";
 
