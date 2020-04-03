@@ -6,6 +6,7 @@
 package VMT;
 
 import VMT.Commands.Command;
+import VMT.Commands.FunctionCommand;
 
 import java.io.PrintStream;
 
@@ -30,13 +31,28 @@ public class CodeWriter {
     private void WriteSetupCode() {
         // We gotta make sure SP contains the
         // beginning of the stack.
-        /*
         writer.println("@" + STACK_START);
         writer.println("D=A");
-
         writer.println("@SP");
         writer.println("M=D");
+
+        // This is according to the test code
+        writer.println("@LCL");
+        writer.println("MD=-1");
+        writer.println("@ARG");
+        writer.println("MD=D-1");
+        writer.println("@THIS");
+        writer.println("MD=D-1");
+        writer.println("@THAT");
+        writer.println("MD=D-1");
+
+        /*
+        writer.println("@Sys.init");
+        writer.println("0;JMP");
          */
+        lp = new LabelProvider("Bootstrap");
+        write(new FunctionCommand("call Sys.init 0".split(" ")));
+        lp = null;
     }
 
     /**
