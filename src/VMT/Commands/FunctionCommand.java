@@ -91,7 +91,9 @@ public class FunctionCommand implements Command {
                     out.println("D=D-A");           // Compute and store SP - n
                 }
                 out.println("@5");                  // Load up 5... because reasons
-                out.println("D=D-A");               // Compute and store SP - n - 5
+                out.println("D=D-A");               // Compute SP - n - 5
+                out.println("@ARG");                // Prepare to write the result to ARG
+                out.println("M=D");                 // Save SP - n - 5 into ARG
 
                 // LCL = SP
                 out.println("@SP");                 // You know the drill

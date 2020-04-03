@@ -30,11 +30,13 @@ public class CodeWriter {
     private void WriteSetupCode() {
         // We gotta make sure SP contains the
         // beginning of the stack.
+        /*
         writer.println("@" + STACK_START);
         writer.println("D=A");
 
         writer.println("@SP");
         writer.println("M=D");
+         */
     }
 
     /**
