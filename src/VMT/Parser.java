@@ -46,7 +46,15 @@ public class Parser {
         }
 
         Command result;
-        String line = reader.readLine().split("//")[0].strip();
+        String rawLine = reader.readLine();
+        System.out.println(rawLine);
+        String[] splitRawLine = rawLine.split("//");
+        String line = "";
+
+        // Gotta make this check so it doesn't choke on //
+        if(splitRawLine.length > 0) {
+            line = splitRawLine[0];
+        }
 
         if(line.isBlank()) {
             result = new EmptyCommand();

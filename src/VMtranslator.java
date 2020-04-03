@@ -3,6 +3,8 @@
 // Project: 7 & 8
 //     Due: 04/06/2020
 
+// ../08/FunctionCalls/NestedCall
+
 import VMT.CodeWriter;
 import VMT.Commands.StackCommand;
 import VMT.Parser;
@@ -49,7 +51,9 @@ public class VMtranslator {
 
                     if(targetFiles.size() > 0) {
                         targetFileNames = targetFiles.toArray(new String[targetFiles.size()]);
-                        outputFileName = targetDir.getPath() + ".asm";
+
+                        outputFileName = targetDir.getPath() + "\\" + targetDir.getPath()
+                                .replaceAll("^.*[/\\\\]", "") + ".asm";
                     }
                     else {
                         throw new IllegalArgumentException("Directory must contain at least one .vm file.");
@@ -68,7 +72,7 @@ public class VMtranslator {
 
                 for(String fullFilePath : targetFileNames) {
                     String strippedFileName = fullFilePath
-                            .replaceAll("^.*/", "")
+                            .replaceAll("^.*[/\\\\]", "")
                             .replaceFirst("\\.vm$", "");
                     //System.out.println();
 
@@ -77,8 +81,11 @@ public class VMtranslator {
                     try(BufferedReader reader = new BufferedReader(new FileReader(fullFilePath))) {
                         Parser p = new Parser(reader);
 
+                        int lineNum = 1;
                         while(p.hasMoreCommands()) {
+                            System.out.print("Line " + lineNum + ": ");
                             writer.write(p.nextCommand());
+                            lineNum++;
                         }
                     }
                     catch (IOException e) {

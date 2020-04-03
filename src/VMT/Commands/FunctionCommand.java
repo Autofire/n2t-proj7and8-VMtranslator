@@ -49,12 +49,71 @@ public class FunctionCommand implements Command {
 
     @Override
     public void write(PrintStream out, LabelProvider lp) {
+        // The segments are pushed onto the stack in this order on a call,
+        // and then popped off the stack in reverse order on a return.
+        final String[] SEGMENTS = {"@LCL", "@ARG", "@THIS", "@THAT"};
+
+        out.println(String.join(" ", "//", command.toString(), functionName, String.valueOf(parameter)));
+
         switch (command) {
             case CALL:
-                throw new UnsupportedOperationException("WIP");
+                String returnLabel = lp.generatedLabel();
+
+                // push return-address
+                out.println("@" + returnLabel);     // Grab the return address
+                out.println("D=A");                 // Save it for later
+
+                out.println("@SP");                 // Load the pointer to the pointer to the stack top
+                out.println("M=M+1");               // We're adding to the top of the stack; increment it now
+                out.println("A=M-1");               // Follow the pointer to the new stack top
+                out.println("M=D");                 // Save the return address to the stack
+
+                // push LCL
+                // push ARG
+                // push THIS
+                // push THAT
+                for(int i = 0; i < SEGMENTS.length; i++) {
+                    out.println(SEGMENTS[i]);       // Load the segment pointer
+                    out.println("D=M");             // Grab the address at which the segment begins
+
+                    out.println("@SP");             // Load the pointer to the pointer to the stack top
+                    out.println("M=M+1");           // Go ahead and increment that bad boy
+                    out.println("A=M-1");           // Follow the pointer to the new stack top
+                    out.println("M=D");             // Drop the segment address onto the stack
+                }
+
+                // ARG = SP - n - 5
+                out.println("@SP");                 // Load the stack pointer-to-pointer stuff
+                out.println("D=M");                 // Grab the address of the stack top
+
+                if(parameter > 0) {
+                    out.println("@" + parameter);   // n is greater than 0... load it in
+                    out.println("D=D-A");           // Compute and store SP - n
+                }
+                out.println("@5");                  // Load up 5... because reasons
+                out.println("D=D-A");               // Compute and store SP - n - 5
+
+                // LCL = SP
+                out.println("@SP");                 // You know the drill
+                out.println("D=M");
+                out.println("@LCL");
+                out.println("M=D");
+
+                // goto f
+                out.println("@" + lp.functionLabel(functionName));
+                out.println("0;JMP");
+
+                // (return-address)
+                out.println("(" + returnLabel + ")");
+
+                break;
 
             case FUNCTION:
-                out.println("@" + lp.functionLabel(functionName));
+                // Assume all code following this function will be part of the function.
+                lp.setFunction(functionName);
+
+                // Put the label to the function's start.
+                out.println("(" + lp.functionLabel(functionName) + ")");
 
                 // In this case, the parameter refers to the number
                 // of bytes of local space the function requires.
@@ -133,14 +192,14 @@ public class FunctionCommand implements Command {
                 // THIS = *(FRAME-2)
                 // ARG = *(FRAME-3)
                 // LCL = *(FRAME-4)
-                String[] segments = {"@THAT", "@THIS", "@ARG", "@LCL"};
-                for(int i = 0; i < segments.length; i++) {
+                for(int i = 0; i < SEGMENTS.length; i++) {
                     out.println(FRAME);             // Load FRAME's address
                     out.println("D=M");             // Load FRAME's value
                     out.println("@" + (i+1));       // Load the offset
                     out.println("A=D-A");           // Compute the address of the segment's old value
                     out.println("D=M");             // Load the segment's old value
-                    out.println(segments[i]);       // Load the associated segment
+                    String segmentName = SEGMENTS[SEGMENTS.length - (i+1)];
+                    out.println(segmentName);       // Load the associated segment
                     out.println("M=D");             // Restore the segment to its old value
                 }
 

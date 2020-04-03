@@ -19,6 +19,10 @@ public class LabelProvider {
         this.file = file;
     }
 
+    public void setFunction(String functionName) {
+        function = functionName;
+    }
+
     public String generatedLabel() {
         nextJumpUUID++;
 
