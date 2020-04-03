@@ -63,6 +63,9 @@ public class Parser {
             else if(words[0].matches(FlowCommand.KEYWORDS)) {
                 result = new FlowCommand(words);
             }
+            else if(words[0].matches(FunctionCommand.KEYWORDS)) {
+                result = new FunctionCommand(words);
+            }
             else {
                 throw new IllegalArgumentException(
                         "Unrecognized statement: " + line

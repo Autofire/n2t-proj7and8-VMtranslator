@@ -35,4 +35,13 @@ public class LabelProvider {
         return String.join(".", file, function, name);
     }
 
+    public String functionLabel(String name) {
+
+        // TODO This should only allow certain kinds of labels
+        // Also I know this looks kinda dumb but we actually just use
+        // the function name itself; we want the function to be callable
+        // from anywhere, so we'll just refer to its label.
+        return name;
+    }
+
 }
