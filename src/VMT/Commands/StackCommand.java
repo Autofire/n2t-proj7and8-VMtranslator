@@ -38,6 +38,11 @@ public class StackCommand implements Command {
     }
 
     @Override
+    public String toString() {
+        return String.join(" ", mode.toString(), segment.toString(), Integer.toString(index));
+    }
+
+    @Override
     public void write(PrintStream out, LabelProvider lp) {
         if(index < 0) {
             throw new UnsupportedOperationException("Cannot have a negative value when pushing/popping.");

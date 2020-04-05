@@ -25,10 +25,10 @@ public class CodeWriter {
 
     public CodeWriter(PrintStream writer) {
         this.writer = writer;
-        WriteSetupCode();
+        //WriteSetupCode();
     }
 
-    private void WriteSetupCode() {
+    public void writeBootstrapCode(String initFunctionName) {
         // We gotta make sure SP contains the
         // beginning of the stack.
         writer.println("@" + STACK_START);
@@ -50,9 +50,12 @@ public class CodeWriter {
         writer.println("@Sys.init");
         writer.println("0;JMP");
          */
+        LabelProvider originalLP = lp;
         lp = new LabelProvider("Bootstrap");
-        write(new FunctionCommand("call Sys.init 0".split(" ")));
-        lp = null;
+        write(new FunctionCommand(
+                new String[] {"call", initFunctionName, "0"}
+        ));
+        lp = originalLP;
     }
 
     /**

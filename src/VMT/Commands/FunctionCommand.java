@@ -48,12 +48,27 @@ public class FunctionCommand implements Command {
     }
 
     @Override
+    public String toString() {
+        if(command == CommandType.RETURN) {
+            return command.toString();
+        }
+        else {
+            return String.join(
+                    " ",
+                    command.toString(),
+                    functionName,
+                    Integer.toString(parameter)
+            );
+        }
+    }
+
+    @Override
     public void write(PrintStream out, LabelProvider lp) {
         // The segments are pushed onto the stack in this order on a call,
         // and then popped off the stack in reverse order on a return.
         final String[] SEGMENTS = {"@LCL", "@ARG", "@THIS", "@THAT"};
 
-        out.println(String.join(" ", "//", command.toString(), functionName, String.valueOf(parameter)));
+        //out.println(String.join(" ", "//", command.toString(), functionName, String.valueOf(parameter)));
 
         switch (command) {
             case CALL:

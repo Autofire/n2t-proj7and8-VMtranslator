@@ -39,6 +39,11 @@ public class FlowCommand implements Command {
     }
 
     @Override
+    public String toString() {
+        return String.join(" ", command.toString(), labelName);
+    }
+
+    @Override
     public void write(PrintStream out, LabelProvider lp) {
 
         switch(command) {

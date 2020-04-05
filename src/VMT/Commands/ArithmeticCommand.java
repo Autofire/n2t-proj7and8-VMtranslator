@@ -40,6 +40,11 @@ public class ArithmeticCommand implements Command {
     }
 
     @Override
+    public String toString() {
+        return operation.toString();
+    }
+
+    @Override
     public void write(PrintStream out, LabelProvider lp) {
         // SP points to the stack pointer
         // R13-R15 can be used as scratch space

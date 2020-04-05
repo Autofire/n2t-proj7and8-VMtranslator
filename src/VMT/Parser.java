@@ -47,7 +47,7 @@ public class Parser {
 
         Command result;
         String rawLine = reader.readLine();
-        System.out.println(rawLine);
+        //System.out.println(rawLine);
         String[] splitRawLine = rawLine.split("//");
         String line = "";
 
@@ -57,7 +57,7 @@ public class Parser {
         }
 
         if(line.isBlank()) {
-            result = new EmptyCommand();
+            result = new EmptyCommand(rawLine);
         }
         else {
             String[] words = line.split("\\s+");

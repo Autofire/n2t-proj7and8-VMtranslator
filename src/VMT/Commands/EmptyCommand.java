@@ -13,6 +13,18 @@ import java.io.PrintStream;
  * This is a nop command. Results on any empty or comment-only line.
  */
 public class EmptyCommand implements Command {
+
+    private String line;
+
+    public EmptyCommand(String line) {
+        this.line = line;
+    }
+
+    @Override
+    public String toString() {
+        return line;
+    }
+
     @Override
     public void write(PrintStream outStream, LabelProvider lp) {
         // We do nothing.
